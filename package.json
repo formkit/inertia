@@ -33,7 +33,7 @@
   },
   "repository": "github:formkit/inertia",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup-node",
     "lint": "publint && eslint",
     "prerelease": "npm run build && npm run lint",
     "release": "bumpp && npm publish"
