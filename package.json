@@ -15,7 +15,9 @@
   "bugs": "https://github.com/formkit/inertia/issues",
   "license": "MIT",
   "author": "Gustavo Fenilli <gustavofenilli@gmail.com>",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -33,6 +35,7 @@
   },
   "repository": "github:formkit/inertia",
   "scripts": {
+    "test": "vitest",
     "build": "tsup-node",
     "lint": "publint && eslint",
     "prerelease": "pnpm run build && pnpm run lint",
@@ -46,11 +49,12 @@
     "eslint": "^8.52.0",
     "publint": "^0.2.5",
     "tsup": "^7.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
   },
   "peerDependencies": {
-    "vue": ">= 3.0.0",
     "@formkit/vue": ">= 1.2.0",
-    "@inertiajs/core": ">= 1.0.0"
+    "@inertiajs/core": ">= 1.0.0",
+    "vue": ">= 3.0.0"
   }
 }
