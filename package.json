@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "vue": ">= 3.0.0",
-    "@formkit/core": ">= 1.2.0",
+    "@formkit/vue": ">= 1.2.0",
     "@inertiajs/core": ">= 1.0.0"
   }
 }
