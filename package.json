@@ -1,7 +1,7 @@
 {
   "name": "@formkit/inertia",
   "version": "0.1.0",
-  "description": "A library that combines FormKit and Inertia to provide a set of Vue composables that simplify the creation of interactive and dynamic forms in your Vue.js applications.",
+  "description": "FormKit + Inertia = ❤️",
   "keywords": [
     "formkit",
     "vue",
