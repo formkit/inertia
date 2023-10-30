@@ -34,7 +34,9 @@
   "repository": "github:formkit/inertia",
   "scripts": {
     "build": "tsup",
-    "lint": "npm run build && publint && eslint"
+    "lint": "publint && eslint",
+    "prerelease": "npm run build && npm run lint",
+    "release": "bumpp && npm publish"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
