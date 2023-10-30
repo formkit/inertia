@@ -1,7 +1,7 @@
 {
   "name": "@formkit/inertia",
   "version": "0.1.0",
-  "description": "A library that combines FormKit and Inertia to provide a set of Vue composables that simplify the creation of interactive and dynamic forms in your Vue.js applications.",
+  "description": "FormKit + Inertia = ❤️",
   "keywords": [
     "formkit",
     "vue",
@@ -35,6 +35,7 @@
   },
   "repository": "github:formkit/inertia",
   "scripts": {
+    "test": "vitest",
     "build": "tsup-node",
     "lint": "publint && eslint",
     "prerelease": "pnpm run build && pnpm run lint",
@@ -49,7 +50,8 @@
     "eslint": "^8.52.0",
     "publint": "^0.2.5",
     "tsup": "^7.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
   },
   "peerDependencies": {
     "@formkit/vue": ">= 1.2.0",
