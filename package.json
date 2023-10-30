@@ -35,8 +35,8 @@
   "scripts": {
     "build": "tsup-node",
     "lint": "publint && eslint",
-    "prerelease": "npm run build && npm run lint",
-    "release": "bumpp && npm publish"
+    "prerelease": "pnpm run build && pnpm run lint",
+    "release": "bumpp && pnpm publish"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "vue": ">= 3.0.0",
-    "@formkit/vue": ">= 1.2.0",
+    "@formkit/core": ">= 1.2.0",
     "@inertiajs/core": ">= 1.0.0"
   }
 }
