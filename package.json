@@ -36,7 +36,7 @@
     "build": "tsup-node",
     "lint": "publint && eslint",
     "prerelease": "pnpm run build && pnpm run lint",
-    "release": "publint && bumpp && pnpm publish"
+    "release": "bumpp && pnpm publish"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
