@@ -11,8 +11,31 @@
     "form",
     "composable"
   ],
+  "homepage": "https://github.com/formkit/inertia#readme",
+  "bugs": "https://github.com/formkit/inertia/issues",
   "license": "MIT",
   "author": "Gustavo Fenilli <gustavofenilli@gmail.com>",
+  "files": ["dist"],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
+  "repository": "github:formkit/inertia",
+  "scripts": {
+    "build": "tsup",
+    "lint": "npm run build && publint && eslint"
+  },
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
