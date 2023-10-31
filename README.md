@@ -25,7 +25,8 @@ This project aims to seamlessly integrate Inertia.js with FormKit forms, leverag
    2. [States](#states)
    3. [Event Functions](#event-functions)
 3. [Event System](#event-system)
-4. [Types](#types)
+4. [Roadmap](#roadmap)
+5. [Types](#types)
 
 ## Quick Start
 
@@ -59,6 +60,14 @@ And that is it, now you're ready to look more into the available features of thi
 ## The Composable `useForm()`
 
 To make integration between FormKit and Inertia easier we include a form helper composable designed to reduce the boilerplate needed for handling form submissions, it by default creates the event system, add method calls and reactive states, and it will also add default behaviours to FormKit forms like loading, disabling and setting errors that come from your backend.
+
+The `useForm()` accepts a single optional parameter that is the initial fields of your form:
+
+```ts
+const form = useForm({
+  email: 'foo@bar.baz',
+})
+```
 
 > Remember that for everything to work as expected you should add the returned plugin to FormKit: `:plugins="[form.plugin]"`.
 
@@ -281,6 +290,13 @@ const options = event.toVisitOptions(node)
 
 router.post('/login', options)
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Roadmap
+
+- [] Make the `success` and `error` events to be able to return a `Promise<void>` to delay the call to the `finish` event
+- [] Add support for [Laravel Precognition](https://laravel.com/docs/10.x/precognition)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
