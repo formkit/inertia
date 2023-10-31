@@ -295,8 +295,8 @@ router.post('/login', options)
 
 ## Roadmap
 
-- [] Make the `success` and `error` events to be able to return a `Promise<void>` to delay the call to the `finish` event
-- [] Add support for [Laravel Precognition](https://laravel.com/docs/10.x/precognition)
+- [ ] Make the `success` and `error` events to be able to return a `Promise<void>` to delay the call to the `finish` event
+- [ ] Add support for [Laravel Precognition](https://laravel.com/docs/10.x/precognition)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
