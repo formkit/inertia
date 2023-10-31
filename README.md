@@ -35,8 +35,8 @@ You also should already have FormKit added to your vue application, you can chec
 
 Now you have all requisites ready to use this package, you can install it with your preferred package manager.
 
-```shell
-foo@bar:~$ npm install @formkit/inertia
+```bash
+npm install @formkit/inertia
 ```
 
 You should be able to to use the now available composable `useForm()`:
