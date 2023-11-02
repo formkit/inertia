@@ -4,10 +4,10 @@ import type { Method, VisitOptions, RequestPayload } from '@inertiajs/core';
 import { createMessage } from '@formkit/core';
 import { router } from '@inertiajs/core';
 import { reactive, toRefs, watchEffect } from 'vue';
-import { useEventsSystem } from './event';
+import { createEventCallbackManager } from './event';
 
 export const useForm = <F extends RequestPayload>(initialFields?: F) => {
-  const event = useEventsSystem<[node: FormKitNode]>();
+  const eventManager = createEventCallbackManager<[node: FormKitNode]>();
 
   let _recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
   let _cancelToken: {
@@ -34,7 +34,7 @@ export const useForm = <F extends RequestPayload>(initialFields?: F) => {
     wasSuccessful: false
   });
 
-  event.combine((on) => {
+  eventManager.combine((on) => {
     on('cancelToken', (token) => {
       _cancelToken = token;
     });
@@ -110,15 +110,29 @@ export const useForm = <F extends RequestPayload>(initialFields?: F) => {
   };
 
   const _createVisitHandler = (method: Method) => (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => {
+    const _optionEventCallbacks: {
+      [key: string]: any
+    } = {};
+
+    const names = Object.keys(eventManager.events) as (keyof typeof eventManager.events)[];
+
+    for (const name of names) {
+      const _callbackName = `on${name.charAt(0).toUpperCase() + name.slice(1)}`;
+
+      _optionEventCallbacks[_callbackName] = (arg: any) => {
+        return eventManager.execute(name, arg, node);
+      };
+    }
+
     if (method === 'delete') {
       router.delete(url, {
-        ...event.toVisitOptions(node),
+        ..._optionEventCallbacks,
         ...options,
         data
       });
     } else {
       router[method](url, data, {
-        ...event.toVisitOptions(node),
+        ..._optionEventCallbacks,
         ...options,
       });
     }
@@ -136,8 +150,8 @@ export const useForm = <F extends RequestPayload>(initialFields?: F) => {
 
     ...toRefs(state),
 
-    on: event.on,
-    combine: event.combine,
+    on: eventManager.on,
+    combine: eventManager.combine,
 
     plugin,
   }

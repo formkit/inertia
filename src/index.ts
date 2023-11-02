@@ -1,4 +1,4 @@
-export type { Events, EventsList } from './event';
-export { useEventsSystem } from './event';
+export type { EventCallback, OnFunction, CombineFunction, ExecuteFunction } from './event';
+export { createEventCallbackManager } from './event';
 
 export { useForm } from './inertia';
