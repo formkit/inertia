@@ -1,157 +1,81 @@
 import type { FormKitNode } from '@formkit/core';
 import type { Method, VisitOptions, RequestPayload } from '@inertiajs/core';
 
-import { createMessage } from '@formkit/core';
-import { router } from '@inertiajs/core';
-import { reactive, toRefs, watchEffect } from 'vue';
-import { createEventCallbackManager } from './event';
+import { router } from '@inertiajs/vue3';
+import { toRefs } from 'vue';
+import { createEventManager } from './eventManager';
+import { createFormkitAddon, createStateAddon } from './addons/index';
+
+export type AddonExtension = (on: ReturnType<typeof createEventManager>['on']) => void;
 
 export const useForm = <F extends RequestPayload>(initialFields?: F) => {
-  const eventManager = createEventCallbackManager<[node: FormKitNode]>();
+  const eventManager = createEventManager();
+  const { state: addonState, addon: stateAddon } = createStateAddon();
+  const { state: formkitState, addon: formkitAddon, plugin } = createFormkitAddon(initialFields);
 
-  let _recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
+  const addon = (addons: AddonExtension | AddonExtension[]) => {
+    if (Array.isArray(addons)) addons.forEach((cb) => cb(eventManager.on));
+    else addons(eventManager.on);
+  };
+
+  addon(stateAddon);
+  addon(formkitAddon);
+
   let _cancelToken: {
     cancel: () => void;
   } | undefined = undefined;
 
-  const state = reactive<{
-    node: FormKitNode | null,
-    dirty: boolean | null;
-    errors: boolean | null;
-    processing: boolean;
-    progress: number;
-    recentlySuccessful: boolean;
-    valid: boolean | null;
-    wasSuccessful: boolean;
-  }>({
-    node: null,
-    dirty: null,
-    errors: null,
-    processing: false,
-    progress: 0,
-    recentlySuccessful: false,
-    valid: null,
-    wasSuccessful: false
-  });
-
-  eventManager.combine((on) => {
+  addon((on) => {
     on('cancelToken', (token) => {
       _cancelToken = token;
     });
 
-    on('before', () => {
-      state.progress = 0;
-      state.recentlySuccessful = false;
-      state.wasSuccessful = false;
-
-      clearInterval(_recentlySuccessfulTimeoutId);
-    });
-
-    on('start', (_, node) => {
-      node.store.set(createMessage({
-        key: 'loading',
-        visible: false,
-        value: true
-      }));
-
-      if (node.props.submitBehavior !== 'live') node.props.disabled = true;
-
-      state.processing = true;
-    });
-
-    on('progress', (axiosProgress) => {
-      state.progress = axiosProgress?.percentage || 0;
-    });
-
-    on('success', () => {
-      state.recentlySuccessful = true;
-      state.wasSuccessful = true;
-
-      _recentlySuccessfulTimeoutId = setTimeout(() => {
-        state.recentlySuccessful = false;
-      }, 2000);
-    });
-
-    on('error', (errors, node) => {
-      node.setErrors(node.name in errors ? errors[node.name] : [], errors);
-    });
-
-    on('finish', (_, node) => {
+    on('finish', () => {
       _cancelToken = undefined;
-
-      node.store.remove('loading');
-
-      if (node.props.submitBehavior !== 'live') node.props.disabled = false;
-
-      state.processing = false;
-      state.progress = 0;
     });
   });
 
-  const plugin = (node: FormKitNode) => {
-    if (node.props.type !== 'form') return;
+  const submit = (method: Method, url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => {
+    const callbackEvents = (Object.keys(eventManager.events) as (keyof typeof eventManager.events)[]).map((name) => ({
+      [`on${name.charAt(0).toUpperCase() + name.slice(1)}`]: (arg: any) => {
+        if (name === 'cancel') return eventManager.run(name, arg);
 
-    state.node = node;
-    node.input(initialFields);
-
-    node.on('created', () => {
-      if (!node.context) return;
-
-      watchEffect(() => {
-        if (!node.context) return;
-
-        state.dirty = node.context.state.dirty;
-        state.valid = node.context.state.valid;
-        state.errors = node.context.state.errors;
-      });
-    });
-
-    return false;
-  };
-
-  const _createVisitHandler = (method: Method) => (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => {
-    const _optionEventCallbacks: {
-      [key: string]: any
-    } = {};
-
-    const names = Object.keys(eventManager.events) as (keyof typeof eventManager.events)[];
-
-    for (const name of names) {
-      const _callbackName = `on${name.charAt(0).toUpperCase() + name.slice(1)}`;
-
-      _optionEventCallbacks[_callbackName] = (arg: any) => {
-        return eventManager.execute(name, arg, node);
-      };
-    }
+        return eventManager.run(name, arg, node);
+      }
+    })).reduce((p, c) => ({ ...p, ...c }), {});
 
     if (method === 'delete') {
       router.delete(url, {
-        ..._optionEventCallbacks,
+        ...callbackEvents,
         ...options,
         data
       });
     } else {
       router[method](url, data, {
-        ..._optionEventCallbacks,
+        ...callbackEvents,
         ...options,
       });
     }
   };
 
   return {
-    get: _createVisitHandler('get'),
-    post: _createVisitHandler('post'),
-    put: _createVisitHandler('put'),
-    patch: _createVisitHandler('patch'),
-    delete: _createVisitHandler('delete'),
+    submit,
+
+    get: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => submit('get', url, options),
+    post: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => submit('post', url, options),
+    put: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => submit('put', url, options),
+    patch: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => submit('patch', url, options),
+    delete: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => submit('delete', url, options),
+
     cancel: () => {
       if (_cancelToken) _cancelToken.cancel();
     },
 
-    ...toRefs(state),
+    ...toRefs(addonState),
+    ...toRefs(formkitState),
 
     on: eventManager.on,
-    combine: eventManager.combine,
+    addon,
 
     plugin,
   }

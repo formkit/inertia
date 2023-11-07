@@ -8,9 +8,9 @@ dependencies:
   '@formkit/vue':
     specifier: '>= 1.2.0'
     version: 1.2.2(typescript@5.2.2)
-  '@inertiajs/core':
+  '@inertiajs/vue3':
     specifier: '>= 1.0.0'
-    version: 1.0.13
+    version: 1.0.14(vue@3.3.7)
   vue:
     specifier: '>= 3.0.0'
     version: 3.3.7(typescript@5.2.2)
@@ -608,13 +608,26 @@ packages:
     resolution: {integrity: sha512-dvuCeX5fC9dXgJn9t+X5atfmgQAzUOWqS1254Gh0m6i8wKd10ebXkfNKiRK+1GWi/yTvvLDHpoxLr0xxxeslWw==}
     dev: true
 
-  /@inertiajs/core@1.0.13:
-    resolution: {integrity: sha512-xPvogbRgAXbogP16EBnGduEmVtImdncEBNQF9etRFF5Ne2nrJafeFgM0FZHqsSqCDvA4jjk8b8Ezt6gZRPK9hg==}
+  /@inertiajs/core@1.0.14:
+    resolution: {integrity: sha512-S33PU6mWEYbn/s2Op+CJ6MN7ON354vWw8Y+UvtQzPt0r7pVgOuIArrqqsoulf9oQz9sbP1+vp/tCvyBzm4XmpA==}
     dependencies:
       axios: 1.6.0
       deepmerge: 4.3.1
       nprogress: 0.2.0
       qs: 6.11.2
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /@inertiajs/vue3@1.0.14(vue@3.3.7):
+    resolution: {integrity: sha512-lKL3Bm9k95Gw1GAq4RxgjfwSMfklkeMbvEfzwmsEBsZ4BbbWwfpC/+KS+4O4faTjjijczvkDPhMKv4duzFxtGw==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      '@inertiajs/core': 1.0.14
+      lodash.clonedeep: 4.5.0
+      lodash.isequal: 4.5.0
+      vue: 3.3.7(typescript@5.2.2)
     transitivePeerDependencies:
       - debug
     dev: false
@@ -2219,6 +2232,14 @@ packages:
   /lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
     dev: true
+
+  /lodash.clonedeep@4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
+    dev: false
+
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    dev: false
 
   /lodash.isfunction@3.0.9:
     resolution: {integrity: sha512-AirXNj15uRIMMPihnkInB4i3NHeb4iBtNg9WRWuK2o31S+ePwwNmDPaTL3o7dTJ+VXNZim7rFs4rxN4YU1oUJw==}
