@@ -18,10 +18,7 @@ The `@formkit/inertia` plugin aims to seamlessly integrate Inertia.js with FormK
 
 1. [Installation](#installation)
 2. [Usage](#usage)
-   1. [Method Calls](#method-calls)
-   2. [States](#states)
-   3. [Event Functions](#event-functions)
-3. [Event Callback Manager](#event-callback-manager)
+3. [Addons](#addons)
 4. [Roadmap](#roadmap)
 5. [Types](#types)
 
@@ -37,17 +34,11 @@ npm install @formkit/inertia
 
 ## Usage
 
-To use the Inertia plugin we need to import the `useForm` function from `@formkit/inertia`, call the `useForm` function to receive the `form`, it comes with Inertia method calls, reactive states, the plugin event system, and the FormKit plugin.
+To use the Inertia plugin we need to import the `useForm` function from `@formkit/inertia`, call the `useForm` function to receive the `form`, it comes with Inertia's method calls, reactive states, the addons for extensions, and the FormKit plugin.
 
-The `useForm` function can take one optional argument:
+The `useForm` function takes one optional argument for the initial fields that will be passed to your form via plugin, it will also return methods like `submit`, `get`, `post`, `put`, `patch` and `delete`. All of these methods will return a suitable function for use as FormKit’s `@submit` handler.
 
-- `initialFields`: The initial fields to be passed to your form.
-
-### Method Calls
-
-The `useForm()` composable returns the methods `get`, `post`, `put`, `patch` and `delete`. All of these methods will return a suitable function for use as FormKit’s `@submit` handler.
-
-The easiest way to use it is by creating a new `const` with the resulting method of your choice:
+The easiest way to use it is by creating a new `const` with the resulting method of your choice, and adding the `form.plugin` to the FormKit form `:plugins`:
 
 ```html
 <script setup lang="ts">
@@ -110,8 +101,6 @@ To cancel a form submission, use the `cancel()` method.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### States
-
 The `useForm()` composable also returns reactive states. The Inertia ones are: `processing`, `progress`, `recentlySuccessful` and `wasSuccessful`, the FormKit based ones are `valid`, `errors`, `dirty` and `node`. For example, you could use the `processing` state to disable the form submit button while Inertia is processing the form (assuming that you’re using your own submit button):
 
 ```html
@@ -129,108 +118,38 @@ The `useForm()` composable also returns reactive states. The Inertia ones are: `
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Event Functions
+## Addons
 
-If you need to new features, or want to run some code on Inertia event callbacks but want to keep the functionality of this package intact, you can use the provided event functions `on()` and `combine()`. These add functions to the event callbacks without having to deal with option merging.
-
-The `on()` function accepts any of the events from Inertia’s event callbacks (without the `on` prefix), specifically: `before`, `start`, `progress`, `success`, `error`, `cancel`, and `finish`. The arguments passed to your callback are the Inertia event’s callback arguments and then FormKit's node:
+The main feature for extending functionality is by passing addons to `addon()`, this way you can target multiple events that will be triggered when those are called by Inertia's event callback system, `addon()` accepts a function or an array of functions with `on()`, it accepts any of the events from Inertia’s event callbacks (without the `on` prefix), specifically: `before`, `start`, `progress`, `success`, `error`, `cancel`, `cancelToken` and `finish`. The arguments passed to your callback are the Inertia event’s callback arguments and then FormKit's node:
 
 ```html
 <script setup lang="ts">
   import { useForm } from '@formkit/inertia'
 
   const form = useForm()
-  form.on('before', () => {
-    return confirm('Are you sure you want to delete this user?')
-  })
-</script>
-```
-
-The `combine()` function is just a easier way to add multiple events in a single place:
-
-```html
-<script setup lang="ts">
-  import { useForm } from '@formkit/inertia'
-
-  const form = useForm()
-  form.combine((on) => {
-    on('before', () => {
+  form.addon((on) => {
+    on('before', (visit, node) => {
       return confirm('Are you sure you want to delete this user?')
     })
 
-    on('success', () => {
+    on('success', (page, node) => {
       toast('User deleted.')
     })
   })
 </script>
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+If you need a single event callback `useForm()` also returns `on()` directly:
 
-## Event Callback Manager
+```html
+<script setup lang="ts">
+  import { useForm } from '@formkit/inertia'
 
-The `createEventCallbackManager()` composable returns 3 functions `on()`, `combine()` and `execute()`. The `on` function accepts these events `before`, `start`, `progress`, `success`, `error`, `cancel`, `finish`:
-
-```ts
-import { createEventCallbackManager } from '@formkit/ineria'
-
-const event = createEventCallbackManager()
-event.on('before', (visit) => {
-  console.log(visit)
-})
-```
-
-As you can see it only gets `visit` as a parameter because `createEventCallbackManager()` was not specified that its events will receive more than that, but you can extend by passing an array of types of parameters to it:
-
-```ts
-import { createEventCallbackManager } from '@formkit/ineria'
-
-const event = createEventCallbackManager<[node: FormKitNode]>()
-event.on('before', (visit, node) => {
-  console.log(visit, node)
-})
-```
-
-The `combine()` function allows you to define multiple events in a single block:
-
-```ts
-// addon.ts
-import { CombineFunction } from '@formkit/inertia'
-
-return (on) => {
-  on('before', (visit, node) => {
-    console.log(visit, node)
+  const form = useForm()
+  form.on('before', (visit, node) => {
+    return confirm('Are you sure you want to delete this user?')
   })
-
-  on('success', (page, node) => {
-    console.log(page, node)
-  })
-} as CombineFunction<[node: FormKitNode]>
-
-// app.ts
-import { createEventCallbackManager } from '@formkit/ineria'
-import addon from './addon'
-
-const event = createEventCallbackManager<[node: FormKitNode]>()
-event.combine(addon)
-```
-
-The `execute()` function executes the given event. It expects the event, parameters, and any other parameter passed as a type to `createEventCallbackManager` and returns the result of the event callback from Inertia:
-
-```ts
-import { createEventCallbackManager } from '@formkit/ineria'
-
-const event = createEventCallbackManager<[node: FormKitNode]>()
-
-event.on('before', (visit, node) => {
-  console.log(visit, node)
-})
-event.on('before', (visit, node) => {
-  return false
-})
-
-const result = event.execute('before', visit, node) // runs console.log
-console.log(result) // returns false
+</script>
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -249,86 +168,34 @@ console.log(result) // returns false
 
 ```ts
 export const useForm: <F extends RequestPayload>(initialFields?: F | undefined) => {
-  on: OnFunction<[node: FormKitNode]>;
-  combine: CombineFunction<[node: FormKitNode]>;
+  on: <T extends "before" | "start" | "progress" | "finish" | "cancel" | "success" | "error" | "cancelToken">(name: T, cb: EventCallback[T]) => void;
+  addon: (addons: AddonExtension | AddonExtension[]) => void;
   plugin: (node: FormKitNode) => false | undefined;
+  node: Ref<FormKitNode | null>;
+  dirty: Ref<boolean | null>;
+  errors: Ref<boolean | null>;
+  valid: Ref<boolean | null>;
+  processing: Ref<boolean>;
+  progress: Ref<number>;
+  recentlySuccessful: Ref<boolean>;
+  wasSuccessful: Ref<boolean>;
+  submit: (method: Method, url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   get: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   post: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   put: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   patch: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   delete: (url: URL | string, options?: Exclude<VisitOptions, 'method' | 'data'>) => (data: F, node: FormKitNode) => void;
   cancel: () => void;
-  node: Ref<FormKitNode | null>;
-  dirty: Ref<boolean | null>;
-  errors: Ref<boolean | null>;
-  processing: Ref<boolean>;
-  progress: Ref<number>;
-  recentlySuccessful: Ref<boolean>;
-  valid: Ref<boolean | null>;
-  wasSuccessful: Ref<boolean>;
 }
 ```
 
 </details>
 
 <details>
-  <summary><code>createEventCallbackManager</code></summary>
+  <summary><code>AddonExtension</code></summary>
 
 ```ts
-export const createEventCallbackManager: <E extends [...args: any]>() => {
-  events: Partial<{
-    [K in keyof EventCallback<E>]: EventCallback<E>[K][];
-  }>;
-  on: <T extends keyof EventCallback<E>>(eventName: T, callback: EventCallback<E>[T]) => void;
-  combine: (combineCb: (cb: typeof on) => void | ((cb: typeof on) => void)[]) => void;
-  execute: <T extends keyof EventCallback<E>>(eventName: T, ...params: Parameters<EventCallback<E>[T]>) => ReturnType<EventCallback<E>[T]> | undefined;
-}
-```
-
-</details>
-
-<details>
-  <summary><code>EventCallback</code></summary>
-
-```ts
-export type EventCallback<A extends [...args: any]> = {
-  [K in keyof Omit<GlobalEventsMap, 'navigate' | 'invalid' | 'exception'>]
-  : (...args: [...GlobalEventsMap[K]['parameters'], ...A])
-    => K extends 'success' | 'error'
-    ? Promise<GlobalEventsMap[K]['result']> | GlobalEventsMap[K]['result']
-    : GlobalEventsMap[K]['result'];
-} & {
-  cancelToken: (...args: [{ cancel: () => void }, ...A]) => void;
-};
-```
-
-</details>
-
-<details>
-  <summary><code>OnFunction</code></summary>
-
-```ts
-export type OnFunction<A extends [...args: any]> = ReturnType<typeof createEventCallbackManager<A>>['on'];
-```
-
-</details>
-
-<details>
-  <summary><code>CombineFunction</code></summary>
-
-```ts
-export type CombineFunction<A extends [...args: any]> = ReturnType<typeof createEventCallbackManager<A>>['combine'];
-```
-
-</details>
-
-</details>
-
-<details>
-  <summary><code>ExecuteFunction</code></summary>
-
-```ts
-export type ExecuteFunction<A extends [...args: any]> = ReturnType<typeof createEventCallbackManager<A>>['execute'];
+export type AddonExtension = (on: ReturnType<typeof createEventManager>['on']) => void;
 ```
 
 </details>
