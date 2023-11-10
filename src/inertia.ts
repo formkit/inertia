@@ -7,11 +7,15 @@ import { createEventManager } from './eventManager';
 import { createFormkitAddon, createStateAddon } from './addons/index';
 
 export type AddonExtension = (on: ReturnType<typeof createEventManager>['on']) => void;
+export interface UseFormOptions {
+  recentlySuccessfulTimeoutTime?: number;
+  formLevelErrorName?: string;
+};
 
-export const useForm = <F extends RequestPayload>(initialFields?: F) => {
+export const useForm = <F extends RequestPayload>(initialFields?: F, options?: UseFormOptions) => {
   const eventManager = createEventManager();
-  const { state: addonState, addon: stateAddon } = createStateAddon();
-  const { state: formkitState, addon: formkitAddon, plugin } = createFormkitAddon(initialFields);
+  const { state: addonState, addon: stateAddon } = createStateAddon(options?.recentlySuccessfulTimeoutTime);
+  const { state: formkitState, addon: formkitAddon, plugin } = createFormkitAddon(initialFields, options?.formLevelErrorName);
 
   const addon = (addons: AddonExtension | AddonExtension[]) => {
     if (Array.isArray(addons)) addons.forEach((cb) => cb(eventManager.on));
