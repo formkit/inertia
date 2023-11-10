@@ -10,7 +10,7 @@ export type AddonExtension = (on: ReturnType<typeof createEventManager>['on']) =
 export interface UseFormOptions {
   recentlySuccessfulTimeoutTime?: number;
   formLevelErrorName?: string;
-};
+}
 
 export const useForm = <F extends RequestPayload>(initialFields?: F, options?: UseFormOptions) => {
   const eventManager = createEventManager();
