@@ -41,7 +41,7 @@ export default <F extends RequestPayload>(initialFields?: F) => {
       if (node.props.type !== 'form') return;
 
       state.node = node;
-      node.input(initialFields);
+      if (initialFields) node.input(initialFields);
 
       node.on('created', () => {
         watchEffect(() => {
