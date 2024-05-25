@@ -32,7 +32,7 @@ export default <F extends RequestPayload>(initialFields?: F, formLevelErrorName?
         /**
          * If one of the errors should be displayed at the form level, we extract
          * it from the errors object and set it as a form level error.
-        */
+         */
         const formErrorMessages: string[] = [];
         if (formLevelErrorName && formLevelErrorName in errors) {
           formErrorMessages[0] = errors[formLevelErrorName];
