@@ -30,14 +30,17 @@ export default <F extends RequestPayload>(initialFields?: F, formLevelErrorName?
       on('error', (errors, node) => {
         const _formLevelErrorName = formLevelErrorName ? formLevelErrorName : node.name;
 
-        let formErrorMessages: string | undefined;
+        /**
+         * If one of the errors should be displayed at the form level, we extract
+         * it from the errors object and set it as a form level error.
+         */
+        const formErrorMessages: string[] = [];
         if (_formLevelErrorName in errors) {
-          formErrorMessages = errors[_formLevelErrorName];
-
+          formErrorMessages[0] = errors[_formLevelErrorName];
           delete errors[_formLevelErrorName];
         }
 
-        node.setErrors(_formLevelErrorName, errors);
+        node.setErrors(formErrorMessages, errors);
       });
 
       on('finish', (_, node) => {
